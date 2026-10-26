@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated across versions from 0.7.1 to 0.8.1, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
+# This code was automatically generated across versions from 0.7.1 to 0.10.0, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
 # This layer exposes the C header to Cython as-is.
 
 from libc.stdint cimport int64_t, uint8_t, uint32_t, int32_t

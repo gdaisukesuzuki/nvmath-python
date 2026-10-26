@@ -16,6 +16,8 @@ Enums and constants
     ConfigParam
     cuDSSError
     DataParam
+    DataType
+    DowncastFactorsMode
     FactorizationAlg
     IndexBase
     Layout
@@ -23,12 +25,15 @@ Enums and constants
     MatrixFormat
     MatrixType
     MatrixViewType
+    MemoryEstimateState
+    MemoryOptimizationFlags
     OpType
     Phase
     PivotEpsilonAlg
     PivotType
     ReorderingAlg
     SolveAlg
+    SolveMode
     Status
 
 Functions
@@ -43,6 +48,7 @@ Functions
     config_get
     config_set
     create
+    create_mg
     data_create
     data_destroy
     data_get
@@ -52,7 +58,12 @@ Functions
     get_config_param_dtype
     get_data_param_dtype
     get_device_mem_handler
+    get_pinned_mem_handler
     get_property
+    logger_force_disable
+    logger_open_file
+    logger_set_level
+    logger_set_mask
     matrix_create_batch_csr
     matrix_create_batch_dn
     matrix_create_csr
@@ -62,12 +73,18 @@ Functions
     matrix_get_batch_dn
     matrix_get_csr
     matrix_get_dn
+    matrix_get_distribution_row1d
     matrix_get_format
     matrix_set_batch_csr_pointers
     matrix_set_batch_values
     matrix_set_csr_pointers
+    matrix_set_distribution_row1d
     matrix_set_values
+    set_async_workspace_allocator
     set_comm_layer
     set_device_mem_handler
+    set_jit_cache_dir
+    set_mg_streams
+    set_pinned_mem_handler
     set_stream
     set_threading_layer

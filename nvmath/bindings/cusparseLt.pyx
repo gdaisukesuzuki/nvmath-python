@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated across versions from 0.7.1 to 0.8.1, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
+# This code was automatically generated across versions from 0.7.1 to 0.10.0, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
 
 cimport cython  # NOQA
 
@@ -484,7 +484,7 @@ cpdef _matmul_alg_selection_destroy(intptr_t alg_selection):
     check_status(__status__)
 
 cpdef intptr_t init() except *:
-    cdef intptr_t handle = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t handle = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if handle == 0:
         raise MemoryError()
     _init(handle)
@@ -496,14 +496,14 @@ cpdef void destroy(intptr_t handle_ptr) except *:
         aligned_free_wrapper(<void*>handle_ptr)
 
 cpdef intptr_t dense_descriptor_init(intptr_t handle, int64_t rows, int64_t cols, int64_t ld, uint32_t alignment, int value_type, int order) except *:
-    cdef intptr_t mat_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t mat_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if mat_descr == 0:
         raise MemoryError()
     _dense_descriptor_init(handle, mat_descr, rows, cols, ld, alignment, value_type, order)
     return mat_descr
 
 cpdef intptr_t structured_descriptor_init(intptr_t handle, int64_t rows, int64_t cols, int64_t ld, uint32_t alignment, int value_type, int order, int sparsity) except *:
-    cdef intptr_t mat_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t mat_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if mat_descr == 0:
         raise MemoryError()
     _structured_descriptor_init(handle, mat_descr, rows, cols, ld, alignment, value_type, order, sparsity)
@@ -515,7 +515,7 @@ cpdef void mat_descriptor_destroy(intptr_t mat_descr_ptr) except *:
         aligned_free_wrapper(<void*>mat_descr_ptr)
 
 cpdef intptr_t matmul_descriptor_init(intptr_t handle, int op_a, int op_b, intptr_t mat_a, intptr_t mat_b, intptr_t mat_c, intptr_t mat_d, int compute_type) except *:
-    cdef intptr_t matmul_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t matmul_descr = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if matmul_descr == 0:
         raise MemoryError()
     _matmul_descriptor_init(handle, matmul_descr, op_a, op_b, mat_a, mat_b, mat_c, mat_d, compute_type)
@@ -527,7 +527,7 @@ cpdef void matmul_descriptor_destroy(intptr_t matmul_descr_ptr) except *:
         aligned_free_wrapper(<void*>matmul_descr_ptr)
 
 cpdef intptr_t matmul_alg_selection_init(intptr_t handle, intptr_t matmul_descr, int alg) except *:
-    cdef intptr_t alg_selection = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t alg_selection = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if alg_selection == 0:
         raise MemoryError()
     _matmul_alg_selection_init(handle, alg_selection, matmul_descr, alg)
@@ -539,7 +539,7 @@ cpdef void matmul_alg_selection_destroy(intptr_t alg_selection_ptr) except *:
         aligned_free_wrapper(<void*>alg_selection_ptr)
 
 cpdef intptr_t matmul_plan_init(intptr_t handle, intptr_t matmul_descr, intptr_t alg_selection) except *:
-    cdef intptr_t plan = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for both 0.7.1 and 0.8.1
+    cdef intptr_t plan = <intptr_t>aligned_alloc_wrapper(16, 1024) # Allocate max size for versions from 0.7.1 to 0.10.0
     if plan == 0:
         raise MemoryError()
     _matmul_plan_init(handle, plan, matmul_descr, alg_selection)

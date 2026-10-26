@@ -6,6 +6,15 @@ cuSPARSELt (:mod:`nvmath.bindings.cusparseLt`)
 For detailed documentation on the original C APIs, refer to the `cuSPARSELt documentation
 <https://docs.nvidia.com/cuda/cusparselt/>`_.
 
+These bindings cover cuSPARSELt versions 0.7.1 through 0.10.0. The public C APIs
+and enums in cuSPARSELt 0.10.0 are unchanged from 0.8.1.
+
+On Windows, cuSPARSELt 0.10.0 uses ``cusparseLt_13.dll`` instead of
+``cusparseLt.dll``. Loading this DLL requires ``cuda-pathfinder>=1.8.3``.
+See the `cuSPARSELt release notes
+<https://docs.nvidia.com/cuda/cusparselt/release_notes.html>`_ for compatibility
+details, including the removal of CUDA 12.9 support in 0.9.0.
+
 Enums and constants
 *******************
 
