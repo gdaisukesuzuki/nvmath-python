@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated with version 0.8.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
+# This code was automatically generated with version 1.0.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
 
 from libc.stdint cimport intptr_t
 
@@ -18,6 +18,7 @@ ctypedef cudssMatrix_t Matrix
 ctypedef cudssData_t Data
 ctypedef cudssConfig_t Config
 ctypedef cudssDeviceMemHandler_t DeviceMemHandler
+ctypedef cudssPinnedMemHandler_t PinnedMemHandler
 ctypedef cudssDistributedInterface_t DistributedInterface
 ctypedef cudssThreadingInterface_t ThreadingInterface
 ctypedef cudssLoggerCallback_t LoggerCallback
@@ -31,6 +32,10 @@ ctypedef libraryPropertyType_t LibraryPropertyType
 ###############################################################################
 
 ctypedef cudssDataType_t _DataType
+ctypedef cudssSolveMode_t _SolveMode
+ctypedef cudssMemoryEstimateState_t _MemoryEstimateState
+ctypedef cudssDowncastFactorsMode_t _DowncastFactorsMode
+ctypedef cudssMemoryOptimizationFlags_t _MemoryOptimizationFlags
 ctypedef cudssConfigParam_t _ConfigParam
 ctypedef cudssDataParam_t _DataParam
 ctypedef cudssPhase_t _Phase
@@ -64,6 +69,7 @@ cpdef set_stream(intptr_t handle, intptr_t stream)
 cpdef set_mg_streams(intptr_t handle, streams, int stream_count)
 cpdef set_comm_layer(intptr_t handle, comm_lib_file_name)
 cpdef set_threading_layer(intptr_t handle, thr_lib_file_name)
+cpdef set_jit_cache_dir(intptr_t handle, cache_dir)
 cpdef intptr_t config_create() except? 0
 cpdef config_destroy(intptr_t solver_config)
 cpdef intptr_t data_create(intptr_t handle) except? 0
@@ -90,6 +96,8 @@ cpdef matrix_set_distribution_row1d(intptr_t matrix, int64_t first_row, int64_t 
 cpdef matrix_get_distribution_row1d(intptr_t matrix, intptr_t first_row, intptr_t last_row)
 cpdef get_device_mem_handler(intptr_t handle, intptr_t handler)
 cpdef set_device_mem_handler(intptr_t handle, intptr_t handler)
+cpdef get_pinned_mem_handler(intptr_t handle, intptr_t handler)
+cpdef set_pinned_mem_handler(intptr_t handle, intptr_t handler)
 cpdef logger_open_file(log_file)
 cpdef logger_set_level(int level)
 cpdef logger_set_mask(int mask)

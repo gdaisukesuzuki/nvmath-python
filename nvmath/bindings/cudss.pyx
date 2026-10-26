@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated with version 0.8.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
+# This code was automatically generated with version 1.0.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
 
 cimport cython  # NOQA
 
@@ -39,9 +39,41 @@ class DataType(_IntEnum):
     R_64F = CUDSS_R_64F
     C_32F = CUDSS_C_32F
     C_64F = CUDSS_C_64F
+    R_64F_MP2 = CUDSS_R_64F_MP2
     R_64F_64F = CUDSS_R_64F_64F
     R_32I = CUDSS_R_32I
     R_64I = CUDSS_R_64I
+
+class SolveMode(_IntEnum):
+    """
+    See `cudssSolveMode_t`.
+    """
+    NORMAL = CUDSS_SOLVE_MODE_NORMAL
+    TRANSPOSE = CUDSS_SOLVE_MODE_TRANSPOSE
+    CONJUGATE_TRANSPOSE = CUDSS_SOLVE_MODE_CONJUGATE_TRANSPOSE
+
+class MemoryEstimateState(_IntEnum):
+    """
+    See `cudssMemoryEstimateState_t`.
+    """
+    NONE = CUDSS_MEMORY_ESTIMATE_STATE_NONE
+    FILL_KNOWN = CUDSS_MEMORY_ESTIMATE_STATE_FILL_KNOWN
+    FINAL = CUDSS_MEMORY_ESTIMATE_STATE_FINAL
+
+class DowncastFactorsMode(_IntEnum):
+    """
+    See `cudssDowncastFactorsMode_t`.
+    """
+    DISABLED = CUDSS_DOWNCAST_FACTORS_MODE_DISABLED
+    KEEP_BLOCK_DIAGONAL = CUDSS_DOWNCAST_FACTORS_MODE_KEEP_BLOCK_DIAGONAL
+    KEEP_STRICT_DIAGONAL = CUDSS_DOWNCAST_FACTORS_MODE_KEEP_STRICT_DIAGONAL
+
+class MemoryOptimizationFlags(_IntEnum):
+    """
+    See `cudssMemoryOptimizationFlags_t`.
+    """
+    DEFAULT = CUDSS_MEMORY_OPTIMIZATION_DEFAULT
+    SOLVE_ONLY = CUDSS_MEMORY_OPTIMIZATION_SOLVE_ONLY
 
 class ConfigParam(_IntEnum):
     """
@@ -73,6 +105,10 @@ class ConfigParam(_IntEnum):
     SCHUR_MODE = CUDSS_CONFIG_SCHUR_MODE
     DETERMINISTIC_MODE = CUDSS_CONFIG_DETERMINISTIC_MODE
     ND_UBFACTOR = CUDSS_CONFIG_ND_UBFACTOR
+    EMULATION_MANTISSA_BIT_COUNT = CUDSS_CONFIG_EMULATION_MANTISSA_BIT_COUNT
+    FORCE_NONSYMMETRIC_MATCHING = CUDSS_CONFIG_FORCE_NONSYMMETRIC_MATCHING
+    DOWNCAST_FACTORS = CUDSS_CONFIG_DOWNCAST_FACTORS
+    MEMORY_OPTIMIZATION_SETTING = CUDSS_CONFIG_MEMORY_OPTIMIZATION_SETTING
 
 class DataParam(_IntEnum):
     """
@@ -298,6 +334,10 @@ cdef dict config_param_sizes = {
     CUDSS_CONFIG_SCHUR_MODE: _numpy.int32,
     CUDSS_CONFIG_DETERMINISTIC_MODE: _numpy.int32,
     CUDSS_CONFIG_ND_UBFACTOR: _numpy.int32,
+    CUDSS_CONFIG_EMULATION_MANTISSA_BIT_COUNT: _numpy.int32,
+    CUDSS_CONFIG_FORCE_NONSYMMETRIC_MATCHING: _numpy.int32,
+    CUDSS_CONFIG_DOWNCAST_FACTORS: _numpy.int32,
+    CUDSS_CONFIG_MEMORY_OPTIMIZATION_SETTING: _numpy.int32,
 }
 
 cpdef get_config_param_dtype(int attr):
@@ -422,6 +462,17 @@ cpdef set_threading_layer(intptr_t handle, thr_lib_file_name):
     check_status(__status__)
 
 
+cpdef set_jit_cache_dir(intptr_t handle, cache_dir):
+    """See `cudssSetJitCacheDir`."""
+    if not isinstance(cache_dir, str):
+        raise TypeError("cache_dir must be a Python str")
+    cdef bytes _temp_cache_dir_ = (<str>cache_dir).encode()
+    cdef char* _cache_dir_ = _temp_cache_dir_
+    with nogil:
+        __status__ = cudssSetJitCacheDir(<Handle>handle, <const char*>_cache_dir_)
+    check_status(__status__)
+
+
 cpdef intptr_t config_create() except? 0:
     """See `cudssConfigCreate`."""
     cdef Config solver_config
@@ -494,7 +545,7 @@ cpdef intptr_t matrix_create_dn(int64_t nrows, int64_t ncols, int64_t ld, intptr
     """See `cudssMatrixCreateDn`."""
     cdef Matrix matrix
     with nogil:
-        __status__ = cudssMatrixCreateDn(&matrix, nrows, ncols, ld, <const void*>values, <_DataType>value_type, <_Layout>layout)
+        __status__ = cudssMatrixCreateDn(&matrix, nrows, ncols, ld, <const void*>values, <cudaDataType_t>value_type, <_Layout>layout)
     check_status(__status__)
     return <intptr_t>matrix
 
@@ -503,7 +554,7 @@ cpdef intptr_t matrix_create_csr(int64_t nrows, int64_t ncols, int64_t nnz, intp
     """See `cudssMatrixCreateCsr`."""
     cdef Matrix matrix
     with nogil:
-        __status__ = cudssMatrixCreateCsr(&matrix, nrows, ncols, nnz, <const void*>row_start, <const void*>row_end, <const void*>col_indices, <const void*>values, <_DataType>offset_type, <_DataType>index_type, <_DataType>value_type, <_MatrixType>mtype, <_MatrixViewType>mview, <_IndexBase>index_base)
+        __status__ = cudssMatrixCreateCsr(&matrix, nrows, ncols, nnz, <const void*>row_start, <const void*>row_end, <const void*>col_indices, <const void*>values, <cudaDataType_t>offset_type, <cudaDataType_t>index_type, <cudaDataType_t>value_type, <_MatrixType>mtype, <_MatrixViewType>mview, <_IndexBase>index_base)
     check_status(__status__)
     return <intptr_t>matrix
 
@@ -512,7 +563,7 @@ cpdef intptr_t matrix_create_batch_dn(int64_t batch_count, intptr_t nrows, intpt
     """See `cudssMatrixCreateBatchDn`."""
     cdef Matrix matrix
     with nogil:
-        __status__ = cudssMatrixCreateBatchDn(&matrix, batch_count, <const void*>nrows, <const void*>ncols, <const void*>ld, <const void* const*>values, <_DataType>integer_type, <_DataType>value_type, <_Layout>layout)
+        __status__ = cudssMatrixCreateBatchDn(&matrix, batch_count, <const void*>nrows, <const void*>ncols, <const void*>ld, <const void* const*>values, <cudaDataType_t>integer_type, <cudaDataType_t>value_type, <_Layout>layout)
     check_status(__status__)
     return <intptr_t>matrix
 
@@ -521,7 +572,7 @@ cpdef intptr_t matrix_create_batch_csr(int64_t batch_count, intptr_t nrows, intp
     """See `cudssMatrixCreateBatchCsr`."""
     cdef Matrix matrix
     with nogil:
-        __status__ = cudssMatrixCreateBatchCsr(&matrix, batch_count, <const void*>nrows, <const void*>ncols, <const void*>nnz, <const void* const*>row_start, <const void* const*>row_end, <const void* const*>col_indices, <const void* const*>values, <_DataType>offset_type, <_DataType>index_type, <_DataType>value_type, <_MatrixType>mtype, <_MatrixViewType>mview, <_IndexBase>index_base)
+        __status__ = cudssMatrixCreateBatchCsr(&matrix, batch_count, <const void*>nrows, <const void*>ncols, <const void*>nnz, <const void* const*>row_start, <const void* const*>row_end, <const void* const*>col_indices, <const void* const*>values, <cudaDataType_t>offset_type, <cudaDataType_t>index_type, <cudaDataType_t>value_type, <_MatrixType>mtype, <_MatrixViewType>mview, <_IndexBase>index_base)
     check_status(__status__)
     return <intptr_t>matrix
 
@@ -536,14 +587,14 @@ cpdef matrix_destroy(intptr_t matrix):
 cpdef matrix_get_dn(intptr_t matrix, intptr_t nrows, intptr_t ncols, intptr_t ld, intptr_t values, intptr_t type, intptr_t layout):
     """See `cudssMatrixGetDn`."""
     with nogil:
-        __status__ = cudssMatrixGetDn(<const Matrix>matrix, <int64_t*>nrows, <int64_t*>ncols, <int64_t*>ld, <void**>values, <_DataType*>type, <_Layout*>layout)
+        __status__ = cudssMatrixGetDn(<const Matrix>matrix, <int64_t*>nrows, <int64_t*>ncols, <int64_t*>ld, <void**>values, <cudaDataType_t*>type, <_Layout*>layout)
     check_status(__status__)
 
 
 cpdef matrix_get_csr(intptr_t matrix, intptr_t nrows, intptr_t ncols, intptr_t nnz, intptr_t row_start, intptr_t row_end, intptr_t col_indices, intptr_t values, intptr_t offset_type, intptr_t index_type, intptr_t value_type, intptr_t mtype, intptr_t mview, intptr_t index_base):
     """See `cudssMatrixGetCsr`."""
     with nogil:
-        __status__ = cudssMatrixGetCsr(<const Matrix>matrix, <int64_t*>nrows, <int64_t*>ncols, <int64_t*>nnz, <void**>row_start, <void**>row_end, <void**>col_indices, <void**>values, <_DataType*>offset_type, <_DataType*>index_type, <_DataType*>value_type, <_MatrixType*>mtype, <_MatrixViewType*>mview, <_IndexBase*>index_base)
+        __status__ = cudssMatrixGetCsr(<const Matrix>matrix, <int64_t*>nrows, <int64_t*>ncols, <int64_t*>nnz, <void**>row_start, <void**>row_end, <void**>col_indices, <void**>values, <cudaDataType_t*>offset_type, <cudaDataType_t*>index_type, <cudaDataType_t*>value_type, <_MatrixType*>mtype, <_MatrixViewType*>mview, <_IndexBase*>index_base)
     check_status(__status__)
 
 
@@ -564,14 +615,14 @@ cpdef matrix_set_csr_pointers(intptr_t matrix, intptr_t row_offsets, intptr_t ro
 cpdef matrix_get_batch_dn(intptr_t matrix, intptr_t batch_count, intptr_t nrows, intptr_t ncols, intptr_t ld, intptr_t values, intptr_t index_type, intptr_t value_type, intptr_t layout):
     """See `cudssMatrixGetBatchDn`."""
     with nogil:
-        __status__ = cudssMatrixGetBatchDn(<const Matrix>matrix, <int64_t*>batch_count, <void**>nrows, <void**>ncols, <void**>ld, <void***>values, <_DataType*>index_type, <_DataType*>value_type, <_Layout*>layout)
+        __status__ = cudssMatrixGetBatchDn(<const Matrix>matrix, <int64_t*>batch_count, <void**>nrows, <void**>ncols, <void**>ld, <void***>values, <cudaDataType_t*>index_type, <cudaDataType_t*>value_type, <_Layout*>layout)
     check_status(__status__)
 
 
 cpdef matrix_get_batch_csr(intptr_t matrix, intptr_t batch_count, intptr_t nrows, intptr_t ncols, intptr_t nnz, intptr_t row_start, intptr_t row_end, intptr_t col_indices, intptr_t values, intptr_t offset_type, intptr_t index_type, intptr_t value_type, intptr_t mtype, intptr_t mview, intptr_t index_base):
     """See `cudssMatrixGetBatchCsr`."""
     with nogil:
-        __status__ = cudssMatrixGetBatchCsr(<const Matrix>matrix, <int64_t*>batch_count, <void**>nrows, <void**>ncols, <void**>nnz, <void***>row_start, <void***>row_end, <void***>col_indices, <void***>values, <_DataType*>offset_type, <_DataType*>index_type, <_DataType*>value_type, <_MatrixType*>mtype, <_MatrixViewType*>mview, <_IndexBase*>index_base)
+        __status__ = cudssMatrixGetBatchCsr(<const Matrix>matrix, <int64_t*>batch_count, <void**>nrows, <void**>ncols, <void**>nnz, <void***>row_start, <void***>row_end, <void***>col_indices, <void***>values, <cudaDataType_t*>offset_type, <cudaDataType_t*>index_type, <cudaDataType_t*>value_type, <_MatrixType*>mtype, <_MatrixViewType*>mview, <_IndexBase*>index_base)
     check_status(__status__)
 
 
@@ -619,10 +670,24 @@ cpdef get_device_mem_handler(intptr_t handle, intptr_t handler):
     check_status(__status__)
 
 
+cpdef get_pinned_mem_handler(intptr_t handle, intptr_t handler):
+    """See `cudssGetPinnedMemHandler`."""
+    with nogil:
+        __status__ = cudssGetPinnedMemHandler(<const Handle>handle, <cudssPinnedMemHandler_t*>handler)
+    check_status(__status__)
+
+
 cpdef set_device_mem_handler(intptr_t handle, intptr_t handler):
     """See `cudssSetDeviceMemHandler`."""
     with nogil:
         __status__ = cudssSetDeviceMemHandler(<Handle>handle, <const cudssDeviceMemHandler_t*>handler)
+    check_status(__status__)
+
+
+cpdef set_pinned_mem_handler(intptr_t handle, intptr_t handler):
+    """See `cudssSetPinnedMemHandler`."""
+    with nogil:
+        __status__ = cudssSetPinnedMemHandler(<Handle>handle, <const cudssPinnedMemHandler_t*>handler)
     check_status(__status__)
 
 

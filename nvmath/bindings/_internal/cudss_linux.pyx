@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated with version 0.8.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
+# This code was automatically generated with version 1.0.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
 
 from libc.stdint cimport intptr_t, uintptr_t
 
@@ -69,6 +69,7 @@ cdef void* __cudssSetStream = NULL
 cdef void* __cudssSetMgStreams = NULL
 cdef void* __cudssSetCommLayer = NULL
 cdef void* __cudssSetThreadingLayer = NULL
+cdef void* __cudssSetJitCacheDir = NULL
 cdef void* __cudssConfigCreate = NULL
 cdef void* __cudssConfigDestroy = NULL
 cdef void* __cudssDataCreate = NULL
@@ -94,7 +95,9 @@ cdef void* __cudssMatrixGetFormat = NULL
 cdef void* __cudssMatrixSetDistributionRow1d = NULL
 cdef void* __cudssMatrixGetDistributionRow1d = NULL
 cdef void* __cudssGetDeviceMemHandler = NULL
+cdef void* __cudssGetPinnedMemHandler = NULL
 cdef void* __cudssSetDeviceMemHandler = NULL
+cdef void* __cudssSetPinnedMemHandler = NULL
 cdef void* __cudssLoggerSetCallback = NULL
 cdef void* __cudssLoggerSetFile = NULL
 cdef void* __cudssLoggerOpenFile = NULL
@@ -183,6 +186,13 @@ cdef int _check_or_init_cudss() except -1 nogil:
             if handle == NULL:
                 handle = load_library()
             __cudssSetThreadingLayer = dlsym(handle, 'cudssSetThreadingLayer')
+
+        global __cudssSetJitCacheDir
+        __cudssSetJitCacheDir = dlsym(RTLD_DEFAULT, 'cudssSetJitCacheDir')
+        if __cudssSetJitCacheDir == NULL:
+            if handle == NULL:
+                handle = load_library()
+            __cudssSetJitCacheDir = dlsym(handle, 'cudssSetJitCacheDir')
 
         global __cudssConfigCreate
         __cudssConfigCreate = dlsym(RTLD_DEFAULT, 'cudssConfigCreate')
@@ -359,12 +369,26 @@ cdef int _check_or_init_cudss() except -1 nogil:
                 handle = load_library()
             __cudssGetDeviceMemHandler = dlsym(handle, 'cudssGetDeviceMemHandler')
 
+        global __cudssGetPinnedMemHandler
+        __cudssGetPinnedMemHandler = dlsym(RTLD_DEFAULT, 'cudssGetPinnedMemHandler')
+        if __cudssGetPinnedMemHandler == NULL:
+            if handle == NULL:
+                handle = load_library()
+            __cudssGetPinnedMemHandler = dlsym(handle, 'cudssGetPinnedMemHandler')
+
         global __cudssSetDeviceMemHandler
         __cudssSetDeviceMemHandler = dlsym(RTLD_DEFAULT, 'cudssSetDeviceMemHandler')
         if __cudssSetDeviceMemHandler == NULL:
             if handle == NULL:
                 handle = load_library()
             __cudssSetDeviceMemHandler = dlsym(handle, 'cudssSetDeviceMemHandler')
+
+        global __cudssSetPinnedMemHandler
+        __cudssSetPinnedMemHandler = dlsym(RTLD_DEFAULT, 'cudssSetPinnedMemHandler')
+        if __cudssSetPinnedMemHandler == NULL:
+            if handle == NULL:
+                handle = load_library()
+            __cudssSetPinnedMemHandler = dlsym(handle, 'cudssSetPinnedMemHandler')
 
         global __cudssLoggerSetCallback
         __cudssLoggerSetCallback = dlsym(RTLD_DEFAULT, 'cudssLoggerSetCallback')
@@ -449,6 +473,9 @@ cpdef dict _inspect_function_pointers():
     global __cudssSetThreadingLayer
     data["__cudssSetThreadingLayer"] = <intptr_t>__cudssSetThreadingLayer
 
+    global __cudssSetJitCacheDir
+    data["__cudssSetJitCacheDir"] = <intptr_t>__cudssSetJitCacheDir
+
     global __cudssConfigCreate
     data["__cudssConfigCreate"] = <intptr_t>__cudssConfigCreate
 
@@ -524,8 +551,14 @@ cpdef dict _inspect_function_pointers():
     global __cudssGetDeviceMemHandler
     data["__cudssGetDeviceMemHandler"] = <intptr_t>__cudssGetDeviceMemHandler
 
+    global __cudssGetPinnedMemHandler
+    data["__cudssGetPinnedMemHandler"] = <intptr_t>__cudssGetPinnedMemHandler
+
     global __cudssSetDeviceMemHandler
     data["__cudssSetDeviceMemHandler"] = <intptr_t>__cudssSetDeviceMemHandler
+
+    global __cudssSetPinnedMemHandler
+    data["__cudssSetPinnedMemHandler"] = <intptr_t>__cudssSetPinnedMemHandler
 
     global __cudssLoggerSetCallback
     data["__cudssLoggerSetCallback"] = <intptr_t>__cudssLoggerSetCallback
@@ -650,6 +683,16 @@ cdef cudssStatus_t _cudssSetThreadingLayer(cudssHandle_t handle, const char* thr
         handle, thrLibFileName)
 
 
+cdef cudssStatus_t _cudssSetJitCacheDir(cudssHandle_t handle, const char* cacheDir) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+    global __cudssSetJitCacheDir
+    _check_or_init_cudss()
+    if __cudssSetJitCacheDir == NULL:
+        with gil:
+            raise FunctionNotFoundError("function cudssSetJitCacheDir is not found")
+    return (<cudssStatus_t (*)(cudssHandle_t, const char*) noexcept nogil>__cudssSetJitCacheDir)(
+        handle, cacheDir)
+
+
 cdef cudssStatus_t _cudssConfigCreate(cudssConfig_t* solverConfig) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssConfigCreate
     _check_or_init_cudss()
@@ -730,43 +773,43 @@ cdef cudssStatus_t _cudssGetProperty(libraryPropertyType propertyType, int* valu
         propertyType, value)
 
 
-cdef cudssStatus_t _cudssMatrixCreateDn(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t ld, const void* values, cudssDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixCreateDn(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t ld, const void* values, cudaDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixCreateDn
     _check_or_init_cudss()
     if __cudssMatrixCreateDn == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixCreateDn is not found")
-    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, int64_t, int64_t, const void*, cudssDataType_t, cudssLayout_t) noexcept nogil>__cudssMatrixCreateDn)(
+    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, int64_t, int64_t, const void*, cudaDataType_t, cudssLayout_t) noexcept nogil>__cudssMatrixCreateDn)(
         matrix, nrows, ncols, ld, values, valueType, layout)
 
 
-cdef cudssStatus_t _cudssMatrixCreateCsr(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t nnz, const void* rowStart, const void* rowEnd, const void* colIndices, const void* values, cudssDataType_t offsetType, cudssDataType_t indexType, cudssDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixCreateCsr(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t nnz, const void* rowStart, const void* rowEnd, const void* colIndices, const void* values, cudaDataType_t offsetType, cudaDataType_t indexType, cudaDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixCreateCsr
     _check_or_init_cudss()
     if __cudssMatrixCreateCsr == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixCreateCsr is not found")
-    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, int64_t, int64_t, const void*, const void*, const void*, const void*, cudssDataType_t, cudssDataType_t, cudssDataType_t, cudssMatrixType_t, cudssMatrixViewType_t, cudssIndexBase_t) noexcept nogil>__cudssMatrixCreateCsr)(
+    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, int64_t, int64_t, const void*, const void*, const void*, const void*, cudaDataType_t, cudaDataType_t, cudaDataType_t, cudssMatrixType_t, cudssMatrixViewType_t, cudssIndexBase_t) noexcept nogil>__cudssMatrixCreateCsr)(
         matrix, nrows, ncols, nnz, rowStart, rowEnd, colIndices, values, offsetType, indexType, valueType, mtype, mview, indexBase)
 
 
-cdef cudssStatus_t _cudssMatrixCreateBatchDn(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* ld, const void* const* values, cudssDataType_t integerType, cudssDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixCreateBatchDn(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* ld, const void* const* values, cudaDataType_t integerType, cudaDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixCreateBatchDn
     _check_or_init_cudss()
     if __cudssMatrixCreateBatchDn == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixCreateBatchDn is not found")
-    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, const void*, const void*, const void*, const void* const*, cudssDataType_t, cudssDataType_t, cudssLayout_t) noexcept nogil>__cudssMatrixCreateBatchDn)(
+    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, const void*, const void*, const void*, const void* const*, cudaDataType_t, cudaDataType_t, cudssLayout_t) noexcept nogil>__cudssMatrixCreateBatchDn)(
         matrix, batchCount, nrows, ncols, ld, values, integerType, valueType, layout)
 
 
-cdef cudssStatus_t _cudssMatrixCreateBatchCsr(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* nnz, const void* const* rowStart, const void* const* rowEnd, const void* const* colIndices, const void* const* values, cudssDataType_t offsetType, cudssDataType_t indexType, cudssDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixCreateBatchCsr(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* nnz, const void* const* rowStart, const void* const* rowEnd, const void* const* colIndices, const void* const* values, cudaDataType_t offsetType, cudaDataType_t indexType, cudaDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixCreateBatchCsr
     _check_or_init_cudss()
     if __cudssMatrixCreateBatchCsr == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixCreateBatchCsr is not found")
-    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, const void*, const void*, const void*, const void* const*, const void* const*, const void* const*, const void* const*, cudssDataType_t, cudssDataType_t, cudssDataType_t, cudssMatrixType_t, cudssMatrixViewType_t, cudssIndexBase_t) noexcept nogil>__cudssMatrixCreateBatchCsr)(
+    return (<cudssStatus_t (*)(cudssMatrix_t*, int64_t, const void*, const void*, const void*, const void* const*, const void* const*, const void* const*, const void* const*, cudaDataType_t, cudaDataType_t, cudaDataType_t, cudssMatrixType_t, cudssMatrixViewType_t, cudssIndexBase_t) noexcept nogil>__cudssMatrixCreateBatchCsr)(
         matrix, batchCount, nrows, ncols, nnz, rowStart, rowEnd, colIndices, values, offsetType, indexType, valueType, mtype, mview, indexBase)
 
 
@@ -780,23 +823,23 @@ cdef cudssStatus_t _cudssMatrixDestroy(cudssMatrix_t matrix) except?_CUDSSSTATUS
         matrix)
 
 
-cdef cudssStatus_t _cudssMatrixGetDn(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* ld, void** values, cudssDataType_t* type, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixGetDn(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* ld, void** values, cudaDataType_t* type, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixGetDn
     _check_or_init_cudss()
     if __cudssMatrixGetDn == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixGetDn is not found")
-    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, int64_t*, int64_t*, void**, cudssDataType_t*, cudssLayout_t*) noexcept nogil>__cudssMatrixGetDn)(
+    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, int64_t*, int64_t*, void**, cudaDataType_t*, cudssLayout_t*) noexcept nogil>__cudssMatrixGetDn)(
         matrix, nrows, ncols, ld, values, type, layout)
 
 
-cdef cudssStatus_t _cudssMatrixGetCsr(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* nnz, void** rowStart, void** rowEnd, void** colIndices, void** values, cudssDataType_t* offsetType, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixGetCsr(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* nnz, void** rowStart, void** rowEnd, void** colIndices, void** values, cudaDataType_t* offsetType, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixGetCsr
     _check_or_init_cudss()
     if __cudssMatrixGetCsr == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixGetCsr is not found")
-    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, int64_t*, int64_t*, void**, void**, void**, void**, cudssDataType_t*, cudssDataType_t*, cudssDataType_t*, cudssMatrixType_t*, cudssMatrixViewType_t*, cudssIndexBase_t*) noexcept nogil>__cudssMatrixGetCsr)(
+    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, int64_t*, int64_t*, void**, void**, void**, void**, cudaDataType_t*, cudaDataType_t*, cudaDataType_t*, cudssMatrixType_t*, cudssMatrixViewType_t*, cudssIndexBase_t*) noexcept nogil>__cudssMatrixGetCsr)(
         matrix, nrows, ncols, nnz, rowStart, rowEnd, colIndices, values, offsetType, indexType, valueType, mtype, mview, indexBase)
 
 
@@ -820,23 +863,23 @@ cdef cudssStatus_t _cudssMatrixSetCsrPointers(cudssMatrix_t matrix, const void* 
         matrix, rowOffsets, rowEnd, colIndices, values)
 
 
-cdef cudssStatus_t _cudssMatrixGetBatchDn(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** ld, void*** values, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixGetBatchDn(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** ld, void*** values, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixGetBatchDn
     _check_or_init_cudss()
     if __cudssMatrixGetBatchDn == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixGetBatchDn is not found")
-    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, void**, void**, void**, void***, cudssDataType_t*, cudssDataType_t*, cudssLayout_t*) noexcept nogil>__cudssMatrixGetBatchDn)(
+    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, void**, void**, void**, void***, cudaDataType_t*, cudaDataType_t*, cudssLayout_t*) noexcept nogil>__cudssMatrixGetBatchDn)(
         matrix, batchCount, nrows, ncols, ld, values, indexType, valueType, layout)
 
 
-cdef cudssStatus_t _cudssMatrixGetBatchCsr(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** nnz, void*** rowStart, void*** rowEnd, void*** colIndices, void*** values, cudssDataType_t* offsetType, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+cdef cudssStatus_t _cudssMatrixGetBatchCsr(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** nnz, void*** rowStart, void*** rowEnd, void*** colIndices, void*** values, cudaDataType_t* offsetType, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssMatrixGetBatchCsr
     _check_or_init_cudss()
     if __cudssMatrixGetBatchCsr == NULL:
         with gil:
             raise FunctionNotFoundError("function cudssMatrixGetBatchCsr is not found")
-    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, void**, void**, void**, void***, void***, void***, void***, cudssDataType_t*, cudssDataType_t*, cudssDataType_t*, cudssMatrixType_t*, cudssMatrixViewType_t*, cudssIndexBase_t*) noexcept nogil>__cudssMatrixGetBatchCsr)(
+    return (<cudssStatus_t (*)(const cudssMatrix_t, int64_t*, void**, void**, void**, void***, void***, void***, void***, cudaDataType_t*, cudaDataType_t*, cudaDataType_t*, cudssMatrixType_t*, cudssMatrixViewType_t*, cudssIndexBase_t*) noexcept nogil>__cudssMatrixGetBatchCsr)(
         matrix, batchCount, nrows, ncols, nnz, rowStart, rowEnd, colIndices, values, offsetType, indexType, valueType, mtype, mview, indexBase)
 
 
@@ -900,6 +943,16 @@ cdef cudssStatus_t _cudssGetDeviceMemHandler(const cudssHandle_t handle, cudssDe
         handle, handler)
 
 
+cdef cudssStatus_t _cudssGetPinnedMemHandler(const cudssHandle_t handle, cudssPinnedMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+    global __cudssGetPinnedMemHandler
+    _check_or_init_cudss()
+    if __cudssGetPinnedMemHandler == NULL:
+        with gil:
+            raise FunctionNotFoundError("function cudssGetPinnedMemHandler is not found")
+    return (<cudssStatus_t (*)(const cudssHandle_t, cudssPinnedMemHandler_t*) noexcept nogil>__cudssGetPinnedMemHandler)(
+        handle, handler)
+
+
 cdef cudssStatus_t _cudssSetDeviceMemHandler(cudssHandle_t handle, const cudssDeviceMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
     global __cudssSetDeviceMemHandler
     _check_or_init_cudss()
@@ -907,6 +960,16 @@ cdef cudssStatus_t _cudssSetDeviceMemHandler(cudssHandle_t handle, const cudssDe
         with gil:
             raise FunctionNotFoundError("function cudssSetDeviceMemHandler is not found")
     return (<cudssStatus_t (*)(cudssHandle_t, const cudssDeviceMemHandler_t*) noexcept nogil>__cudssSetDeviceMemHandler)(
+        handle, handler)
+
+
+cdef cudssStatus_t _cudssSetPinnedMemHandler(cudssHandle_t handle, const cudssPinnedMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil:
+    global __cudssSetPinnedMemHandler
+    _check_or_init_cudss()
+    if __cudssSetPinnedMemHandler == NULL:
+        with gil:
+            raise FunctionNotFoundError("function cudssSetPinnedMemHandler is not found")
+    return (<cudssStatus_t (*)(cudssHandle_t, const cudssPinnedMemHandler_t*) noexcept nogil>__cudssSetPinnedMemHandler)(
         handle, handler)
 
 

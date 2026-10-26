@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated with version 0.8.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
+# This code was automatically generated with version 1.0.0, generator version 0.3.1.dev1725+g07a86fe3d.d20260603. Do not modify it directly.
 # This layer exposes the C header to Cython as-is.
 
 from libc.stdint cimport int64_t
@@ -16,15 +16,37 @@ from ._internal.common_types cimport cudaDataType, cudaDataType_t, cudaStream_t,
 ###############################################################################
 
 # enums
-ctypedef enum cudssDataType_t "cudssDataType_t":
-    CUDSS_DATA_TYPE_UNSET "CUDSS_DATA_TYPE_UNSET" = 1024
-    CUDSS_R_32F "CUDSS_R_32F" = 0
-    CUDSS_R_64F "CUDSS_R_64F" = 1
-    CUDSS_C_32F "CUDSS_C_32F" = 4
-    CUDSS_C_64F "CUDSS_C_64F" = 5
-    CUDSS_R_64F_64F "CUDSS_R_64F_64F" = (1025 + CUDSS_R_64F)
-    CUDSS_R_32I "CUDSS_R_32I" = 10
-    CUDSS_R_64I "CUDSS_R_64I" = 24
+ctypedef cudaDataType_t cudssDataType_t
+
+cdef enum:
+    CUDSS_DATA_TYPE_UNSET = 63
+    CUDSS_R_32F = 0
+    CUDSS_R_64F = 1
+    CUDSS_C_32F = 4
+    CUDSS_C_64F = 5
+    CUDSS_R_64F_MP2 = 62
+    CUDSS_R_32I = 10
+    CUDSS_R_64I = 24
+    CUDSS_R_64F_64F = CUDSS_R_64F_MP2
+
+ctypedef enum cudssSolveMode_t "cudssSolveMode_t":
+    CUDSS_SOLVE_MODE_NORMAL "CUDSS_SOLVE_MODE_NORMAL" = 0
+    CUDSS_SOLVE_MODE_TRANSPOSE "CUDSS_SOLVE_MODE_TRANSPOSE" = 1
+    CUDSS_SOLVE_MODE_CONJUGATE_TRANSPOSE "CUDSS_SOLVE_MODE_CONJUGATE_TRANSPOSE" = 2
+
+ctypedef enum cudssMemoryEstimateState_t "cudssMemoryEstimateState_t":
+    CUDSS_MEMORY_ESTIMATE_STATE_NONE "CUDSS_MEMORY_ESTIMATE_STATE_NONE" = 0
+    CUDSS_MEMORY_ESTIMATE_STATE_FILL_KNOWN "CUDSS_MEMORY_ESTIMATE_STATE_FILL_KNOWN" = 1
+    CUDSS_MEMORY_ESTIMATE_STATE_FINAL "CUDSS_MEMORY_ESTIMATE_STATE_FINAL" = 2
+
+ctypedef enum cudssDowncastFactorsMode_t "cudssDowncastFactorsMode_t":
+    CUDSS_DOWNCAST_FACTORS_MODE_DISABLED "CUDSS_DOWNCAST_FACTORS_MODE_DISABLED" = 0
+    CUDSS_DOWNCAST_FACTORS_MODE_KEEP_BLOCK_DIAGONAL "CUDSS_DOWNCAST_FACTORS_MODE_KEEP_BLOCK_DIAGONAL" = 1
+    CUDSS_DOWNCAST_FACTORS_MODE_KEEP_STRICT_DIAGONAL "CUDSS_DOWNCAST_FACTORS_MODE_KEEP_STRICT_DIAGONAL" = 2
+
+ctypedef enum cudssMemoryOptimizationFlags_t "cudssMemoryOptimizationFlags_t":
+    CUDSS_MEMORY_OPTIMIZATION_DEFAULT "CUDSS_MEMORY_OPTIMIZATION_DEFAULT" = 0
+    CUDSS_MEMORY_OPTIMIZATION_SOLVE_ONLY "CUDSS_MEMORY_OPTIMIZATION_SOLVE_ONLY" = (1 << 0)
 
 ctypedef enum cudssConfigParam_t "cudssConfigParam_t":
     CUDSS_CONFIG_REORDERING_ALG "CUDSS_CONFIG_REORDERING_ALG"
@@ -53,6 +75,10 @@ ctypedef enum cudssConfigParam_t "cudssConfigParam_t":
     CUDSS_CONFIG_SCHUR_MODE "CUDSS_CONFIG_SCHUR_MODE"
     CUDSS_CONFIG_DETERMINISTIC_MODE "CUDSS_CONFIG_DETERMINISTIC_MODE"
     CUDSS_CONFIG_ND_UBFACTOR "CUDSS_CONFIG_ND_UBFACTOR"
+    CUDSS_CONFIG_EMULATION_MANTISSA_BIT_COUNT "CUDSS_CONFIG_EMULATION_MANTISSA_BIT_COUNT"
+    CUDSS_CONFIG_FORCE_NONSYMMETRIC_MATCHING "CUDSS_CONFIG_FORCE_NONSYMMETRIC_MATCHING"
+    CUDSS_CONFIG_DOWNCAST_FACTORS "CUDSS_CONFIG_DOWNCAST_FACTORS"
+    CUDSS_CONFIG_MEMORY_OPTIMIZATION_SETTING "CUDSS_CONFIG_MEMORY_OPTIMIZATION_SETTING"
 
 ctypedef enum cudssDataParam_t "cudssDataParam_t":
     CUDSS_DATA_INFO "CUDSS_DATA_INFO"
@@ -195,25 +221,31 @@ ctypedef struct cudssDeviceMemHandler_t 'cudssDeviceMemHandler_t':
     int (*device_free)(void*, void*, size_t, cudaStream_t)
     char name[64]
 
+ctypedef struct cudssPinnedMemHandler_t 'cudssPinnedMemHandler_t':
+    void* ctx
+    int (*pinned_alloc)(void*, void**, size_t, cudaStream_t)
+    int (*pinned_free)(void*, void*, size_t, cudaStream_t)
+    char name[64]
+
 ctypedef struct cudssDistributedInterface_t 'cudssDistributedInterface_t':
     int (*cudssCommRankDevice)(void*, int*)
     int (*cudssCommSizeDevice)(void*, int*)
-    int (*cudssSendDevice)(const void*, int, cudssDataType_t, int, int, void*, cudaStream_t)
-    int (*cudssRecvDevice)(void*, int, cudssDataType_t, int, int, void*, cudaStream_t)
-    int (*cudssBcastDevice)(void*, int, cudssDataType_t, int, void*, cudaStream_t)
-    int (*cudssReduceDevice)(const void*, void*, int, cudssDataType_t, cudssOpType_t, int, void*, cudaStream_t)
-    int (*cudssAllreduceDevice)(const void*, void*, int, cudssDataType_t, cudssOpType_t, void*, cudaStream_t)
-    int (*cudssScattervDevice)(const void*, const int*, const int*, cudssDataType_t, void*, int, cudssDataType_t, int, void*, cudaStream_t)
+    int (*cudssSendDevice)(const void*, int, cudaDataType_t, int, int, void*, cudaStream_t)
+    int (*cudssRecvDevice)(void*, int, cudaDataType_t, int, int, void*, cudaStream_t)
+    int (*cudssBcastDevice)(void*, int, cudaDataType_t, int, void*, cudaStream_t)
+    int (*cudssReduceDevice)(const void*, void*, int, cudaDataType_t, cudssOpType_t, int, void*, cudaStream_t)
+    int (*cudssAllreduceDevice)(const void*, void*, int, cudaDataType_t, cudssOpType_t, void*, cudaStream_t)
+    int (*cudssScattervDevice)(const void*, const int*, const int*, cudaDataType_t, void*, int, cudaDataType_t, int, void*, cudaStream_t)
     int (*cudssCommSplitDevice)(const void*, int, int, void*)
     int (*cudssCommFreeDevice)(void*)
     int (*cudssCommRankHost)(void*, int*)
     int (*cudssCommSizeHost)(void*, int*)
-    int (*cudssSendHost)(const void*, int, cudssDataType_t, int, int, void*, cudaStream_t)
-    int (*cudssRecvHost)(void*, int, cudssDataType_t, int, int, void*, cudaStream_t)
-    int (*cudssBcastHost)(void*, int, cudssDataType_t, int, void*, cudaStream_t)
-    int (*cudssReduceHost)(const void*, void*, int, cudssDataType_t, cudssOpType_t, int, void*, cudaStream_t)
-    int (*cudssAllreduceHost)(const void*, void*, int, cudssDataType_t, cudssOpType_t, void*, cudaStream_t)
-    int (*cudssScattervHost)(const void*, const int*, const int*, cudssDataType_t, void*, int, cudssDataType_t, int, void*, cudaStream_t)
+    int (*cudssSendHost)(const void*, int, cudaDataType_t, int, int, void*, cudaStream_t)
+    int (*cudssRecvHost)(void*, int, cudaDataType_t, int, int, void*, cudaStream_t)
+    int (*cudssBcastHost)(void*, int, cudaDataType_t, int, void*, cudaStream_t)
+    int (*cudssReduceHost)(const void*, void*, int, cudaDataType_t, cudssOpType_t, int, void*, cudaStream_t)
+    int (*cudssAllreduceHost)(const void*, void*, int, cudaDataType_t, cudssOpType_t, void*, cudaStream_t)
+    int (*cudssScattervHost)(const void*, const int*, const int*, cudaDataType_t, void*, int, cudaDataType_t, int, void*, cudaStream_t)
     int (*cudssCommSplitHost)(const void*, int, int, void*)
     int (*cudssCommFreeHost)(void*)
     int (*cudssDistributedGetProperty)(libraryPropertyType, int*)
@@ -243,6 +275,7 @@ cdef cudssStatus_t cudssSetStream(cudssHandle_t handle, cudaStream_t stream) exc
 cdef cudssStatus_t cudssSetMgStreams(cudssHandle_t handle, const cudaStream_t* streams, int stream_count) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssSetCommLayer(cudssHandle_t handle, const char* commLibFileName) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssSetThreadingLayer(cudssHandle_t handle, const char* thrLibFileName) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssSetJitCacheDir(cudssHandle_t handle, const char* cacheDir) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssConfigCreate(cudssConfig_t* solverConfig) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssConfigDestroy(cudssConfig_t solverConfig) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssDataCreate(const cudssHandle_t handle, cudssData_t* solverData) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
@@ -251,24 +284,26 @@ cdef cudssStatus_t cudssCreate(cudssHandle_t* handle) except?_CUDSSSTATUS_T_INTE
 cdef cudssStatus_t cudssCreateMg(cudssHandle_t* handle_pt, int device_count, const int* device_indices) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssDestroy(cudssHandle_t handle) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssGetProperty(libraryPropertyType propertyType, int* value) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixCreateDn(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t ld, const void* values, cudssDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixCreateCsr(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t nnz, const void* rowStart, const void* rowEnd, const void* colIndices, const void* values, cudssDataType_t offsetType, cudssDataType_t indexType, cudssDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixCreateBatchDn(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* ld, const void* const* values, cudssDataType_t integerType, cudssDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixCreateBatchCsr(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* nnz, const void* const* rowStart, const void* const* rowEnd, const void* const* colIndices, const void* const* values, cudssDataType_t offsetType, cudssDataType_t indexType, cudssDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixCreateDn(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t ld, const void* values, cudaDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixCreateCsr(cudssMatrix_t* matrix, int64_t nrows, int64_t ncols, int64_t nnz, const void* rowStart, const void* rowEnd, const void* colIndices, const void* values, cudaDataType_t offsetType, cudaDataType_t indexType, cudaDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixCreateBatchDn(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* ld, const void* const* values, cudaDataType_t integerType, cudaDataType_t valueType, cudssLayout_t layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixCreateBatchCsr(cudssMatrix_t* matrix, int64_t batchCount, const void* nrows, const void* ncols, const void* nnz, const void* const* rowStart, const void* const* rowEnd, const void* const* colIndices, const void* const* values, cudaDataType_t offsetType, cudaDataType_t indexType, cudaDataType_t valueType, cudssMatrixType_t mtype, cudssMatrixViewType_t mview, cudssIndexBase_t indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixDestroy(cudssMatrix_t matrix) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixGetDn(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* ld, void** values, cudssDataType_t* type, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixGetCsr(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* nnz, void** rowStart, void** rowEnd, void** colIndices, void** values, cudssDataType_t* offsetType, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixGetDn(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* ld, void** values, cudaDataType_t* type, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixGetCsr(const cudssMatrix_t matrix, int64_t* nrows, int64_t* ncols, int64_t* nnz, void** rowStart, void** rowEnd, void** colIndices, void** values, cudaDataType_t* offsetType, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixSetValues(cudssMatrix_t matrix, const void* values) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixSetCsrPointers(cudssMatrix_t matrix, const void* rowOffsets, const void* rowEnd, const void* colIndices, const void* values) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixGetBatchDn(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** ld, void*** values, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
-cdef cudssStatus_t cudssMatrixGetBatchCsr(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** nnz, void*** rowStart, void*** rowEnd, void*** colIndices, void*** values, cudssDataType_t* offsetType, cudssDataType_t* indexType, cudssDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixGetBatchDn(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** ld, void*** values, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssLayout_t* layout) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssMatrixGetBatchCsr(const cudssMatrix_t matrix, int64_t* batchCount, void** nrows, void** ncols, void** nnz, void*** rowStart, void*** rowEnd, void*** colIndices, void*** values, cudaDataType_t* offsetType, cudaDataType_t* indexType, cudaDataType_t* valueType, cudssMatrixType_t* mtype, cudssMatrixViewType_t* mview, cudssIndexBase_t* indexBase) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixSetBatchValues(cudssMatrix_t matrix, const void* const* values) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixSetBatchCsrPointers(cudssMatrix_t matrix, const void* const* rowOffsets, const void* const* rowEnd, const void* const* colIndices, const void* const* values) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixGetFormat(const cudssMatrix_t matrix, int* format) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixSetDistributionRow1d(cudssMatrix_t matrix, int64_t first_row, int64_t last_row) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssMatrixGetDistributionRow1d(const cudssMatrix_t matrix, int64_t* first_row, int64_t* last_row) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssGetDeviceMemHandler(const cudssHandle_t handle, cudssDeviceMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssGetPinnedMemHandler(const cudssHandle_t handle, cudssPinnedMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssSetDeviceMemHandler(cudssHandle_t handle, const cudssDeviceMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
+cdef cudssStatus_t cudssSetPinnedMemHandler(cudssHandle_t handle, const cudssPinnedMemHandler_t* handler) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssLoggerSetCallback(cudssLoggerCallback_t callback) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssLoggerSetFile(FILE* file) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
 cdef cudssStatus_t cudssLoggerOpenFile(const char* logFile) except?_CUDSSSTATUS_T_INTERNAL_LOADING_ERROR nogil
