@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated across versions from 2.5.0 to 2.6.0, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
+# This code was automatically generated across versions from 2.5.0 to 2.8.1, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
 
 cimport cython  # NOQA
 cimport cpython
@@ -198,6 +198,7 @@ class OperationDescriptorAttribute(_IntEnum):
     PADDING_LEFT = CUTENSOR_OPERATION_DESCRIPTOR_PADDING_LEFT
     PADDING_RIGHT = CUTENSOR_OPERATION_DESCRIPTOR_PADDING_RIGHT
     PADDING_VALUE = CUTENSOR_OPERATION_DESCRIPTOR_PADDING_VALUE
+    BLOCKSPARSE_REPRODUCIBLE = CUTENSOR_OPERATION_DESCRIPTOR_BLOCKSPARSE_REPRODUCIBLE
 
 class PlanPreferenceAttribute(_IntEnum):
     """
@@ -454,6 +455,7 @@ cdef dict operation_descriptor_attribute_sizes = {
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_LEFT: _numpy.uint32,
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_RIGHT: _numpy.uint32,
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_VALUE: _numpy.uint64,
+    CUTENSOR_OPERATION_DESCRIPTOR_BLOCKSPARSE_REPRODUCIBLE: _numpy.int32,
 }
 
 cpdef get_operation_descriptor_attribute_dtype(int attr):

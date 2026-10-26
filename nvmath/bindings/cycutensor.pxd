@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# This code was automatically generated across versions from 2.5.0 to 2.6.0, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
+# This code was automatically generated across versions from 2.5.0 to 2.8.1, generator version 0.3.1.dev1471+g7122059e9. Do not modify it directly.
 # This layer exposes the C header to Cython as-is.
 
 from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
@@ -88,6 +88,7 @@ ctypedef enum cutensorOperationDescriptorAttribute_t "cutensorOperationDescripto
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_LEFT "CUTENSOR_OPERATION_DESCRIPTOR_PADDING_LEFT" = 4
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_RIGHT "CUTENSOR_OPERATION_DESCRIPTOR_PADDING_RIGHT" = 5
     CUTENSOR_OPERATION_DESCRIPTOR_PADDING_VALUE "CUTENSOR_OPERATION_DESCRIPTOR_PADDING_VALUE" = 6
+    CUTENSOR_OPERATION_DESCRIPTOR_BLOCKSPARSE_REPRODUCIBLE "CUTENSOR_OPERATION_DESCRIPTOR_BLOCKSPARSE_REPRODUCIBLE" = 14
 
 ctypedef enum cutensorPlanPreferenceAttribute_t "cutensorPlanPreferenceAttribute_t":
     CUTENSOR_PLAN_PREFERENCE_AUTOTUNE_MODE "CUTENSOR_PLAN_PREFERENCE_AUTOTUNE_MODE" = 0

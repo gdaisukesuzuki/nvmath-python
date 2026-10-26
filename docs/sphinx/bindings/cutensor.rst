@@ -6,6 +6,19 @@ cuTENSOR (:mod:`nvmath.bindings.cutensor`)
 For detailed documentation on the original C APIs, refer to the `cuTENSOR documentation
 <https://docs.nvidia.com/cuda/cutensor/latest/index.html>`_.
 
+These bindings cover cuTENSOR versions 2.5.0 through 2.8.1. Block-sparse tensor
+contractions are production features starting with cuTENSOR 2.8.0.
+
+To request bitwise-reproducible block-sparse contractions, set
+:attr:`OperationDescriptorAttribute.BLOCKSPARSE_REPRODUCIBLE` to a non-zero
+``int32`` value using :func:`operation_descriptor_set_attribute` before calling
+:func:`create_plan`. The default value is zero, which favors performance.
+
+Starting with cuTENSOR 2.8.0, :func:`create_contraction` requires
+``op_c=Operator.IDENTITY``. Other operators raise :class:`cuTENSORError` with
+:attr:`Status.NOT_SUPPORTED`. See the `cuTENSOR release notes
+<https://docs.nvidia.com/cuda/cutensor/latest/release_notes.html>`_ for details.
+
 Enums and constants
 *******************
 
@@ -31,6 +44,7 @@ Functions
 .. autosummary::
    :toctree: generated/
 
+   check_status
    create
    destroy
    handle_resize_plan_cache

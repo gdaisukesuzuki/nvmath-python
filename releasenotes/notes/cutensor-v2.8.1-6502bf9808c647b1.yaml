@@ -1,0 +1,4 @@
+features:
+  - Added :mod:`nvmath.bindings.cutensor` support for cuTENSOR 2.8.1, including
+    :attr:`~nvmath.bindings.cutensor.OperationDescriptorAttribute.BLOCKSPARSE_REPRODUCIBLE`
+    for requesting bitwise-reproducible block-sparse contractions.
